@@ -4,157 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Commerce - Loja Virtual</title>
-    <style>
-        :root {
-            --marrom: #382415;
-            --laranja: #D96B27;
-            --amarelo: #F2B705;
-            --fundo: #FFFDF5;
-            --texto: #3D2616;
+<script>
+async function comprar(produtoId, preco) {
+    const btn = event.target;
+    btn.disabled = true;
+    btn.innerText = 'Processando...';
+
+    try {
+        const res = await fetch('/api/pedidos/processar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                idUsuario: 1, // Exemplo de usuário logado
+                itens: [
+                    { idProduto: produtoId, quantidade: 1, precoUnitario: preco }
+                ]
+            })
+        });
+
+        const resultado = await res.json();
+
+        if (res.ok) {
+            alert('✅ ' + resultado.mensagem);
+            // Recarrega o catálogo para mostrar o novo saldo de estoque abatido
+            carregarProdutos();
+        } else {
+            alert('❌ Erro: ' + resultado.erro);
         }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--fundo);
-            color: var(--texto);
-        }
-
-        header {
-            background-color: var(--marrom);
-            color: white;
-            padding: 20px 40px;
-            border-bottom: 5px solid var(--amarelo);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 24px;
-            color: var(--amarelo); 
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        .grid-produtos {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .card-produto {
-            background: white;
-            border: 1px solid #f2e3d5;
-            border-top: 4px solid var(--laranja);
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(92, 58, 33, 0.05);
-            transition: transform 0.2s;
-        }
-
-        .card-produto:hover {
-            transform: translateY(-4px);
-        }
-
-        .card-produto h3 {
-            margin-top: 0;
-            color: var(--marrom);
-        }
-
-        .preco {
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--laranja);
-            margin: 10px 0;
-        }
-
-        .tag-estoque {
-            display: inline-block;
-            background-color: #FFF8EB;
-            color: var(--marrom);
-            border: 1px solid var(--amarelo);
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .btn-comprar {
-            width: 100%;
-            background-color: var(--laranja);
-            color: rgb(0, 0, 0);
-            border: none;
-            padding: 12px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 15px;
-            transition: background 0.2s;
-        }
-
-        .btn-comprar:hover {
-            background-color: var(--marrom);
-        }
-    </style>
-</head>
-<body>
-
-    <header>
-        <h1>Comercial Pancoti</h1>
-        <span>Painel do Cliente</span>
-    </header>
-
-    <div class="container">
-        <h2 style="color: var(--marrom);">Catálogo de Produtos</h2>
-        <div id="lista-produtos" class="grid-produtos">Carregando produtos...</div>
-    </div>
-
-    <script>
-        async function carregarProdutos() {
-            const res = await fetch('/api/produtos');
-            const produtos = await res.json();
-            
-            const container = document.getElementById('lista-produtos');
-            container.innerHTML = '';
-
-            produtos.forEach(p => {
-                container.innerHTML += `
-                    <div class="card-produto">
-                        <h3>${p.nome}</h3>
-                        <div class="preco">R$ ${p.preco.toFixed(2)}</div>
-                        <div class="tag-estoque">Estoque: ${p.estoque} un.</div>
-                        <button class="btn-comprar" onclick="comprar(${p.id})">Comprar Agora</button>
-                    </div>
-                `;
-            });
-        }
-
-        async function comprar(produtoId) {
-            const res = await fetch('/api/comprar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ produtoId, quantidade: 1 })
-            });
-
-            const resultado = await res.json();
-
-            if (res.ok) {
-                alert(resultado.mensagem);
-                carregarProdutos();
-            } else {
-                alert(resultado.erro);
-            }
-        }
-
-        carregarProdutos();
-    </script>
+    } catch (err) {
+        alert('Erro ao se comunicar com o servidor.');
+    } finally {
+        btn.disabled = false;
+        btn.innerText = 'Comprar Agora';
+    }
+}
+</script>
 </body>
 </html>
+
